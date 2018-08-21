@@ -7,6 +7,10 @@
      localStorage.setItem("token",token);           
   </script>
 <% } %>
+
+<% if(msg) { %>
+  <h2> <%= msg %> </h2>
+  <% } %>
 <div class="login-page">
   
     <div class="form">
@@ -18,17 +22,14 @@
           
             <input type="file"
              id="file" name="thefile"
-             accept="text/plain, image/jpeg" />
+             accept=".csv" />
           </div>
         <button type="submit">Submit</button>
         <p class="message">Add an uploader? <a href="#">Create an account</a></p>
       </form>
     </div>
   </div>
-<script>
-  var file = document.querySelector("#file");
-  file.addEventListener("onUpload",)
-</script>
+
 
 <!--
 <div class="box">

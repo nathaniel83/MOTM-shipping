@@ -63,8 +63,9 @@ module.exports.comparePassword = function(candidatePassword, hash, callback){
 
 module.exports.storeTrackingData = function(theData,callback){
     console.log("attempting to store tracking data");
+    let time = Date.now()
     for(var i = 0; i<theData.length;i++){
-    let sql = "INSERT INTO tracking (tracking_id,submitting_user) VALUES ('"+theData.trackingId+"','"+theData.user+"')";
+    let sql = "INSERT INTO tracking (tracking_id,submitting_user,created) VALUES ('"+theData[i]['I']+"','"+"test"+"','"+time+"')";
     db.query(sql,function(err,result){
         if(err) {
             callback(err,null);

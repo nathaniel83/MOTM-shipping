@@ -6,6 +6,10 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const fileUpload = require('express-fileupload');
 var request = require('request');
+
+const csv=require('csvtojson')
+
+
 //...
 app.use(fileUpload());
 
@@ -61,7 +65,36 @@ app.get("/upload",function(req,res,next){
 app.post("/upload",function(req,res,next){
    console.log("upload route");
    console.log(req.files.thefile.name);
-});
+   //Save File
+   let csvFile = req.files.thefile;
+   csvFile.mv('./dataFolder/data.csv', function(err) {
+    if (err){
+      
+      console.log("there is an error: " +err)
+    }else{
+    console.log("File uploaded!");
+    }
+  });
+
+   const csvFilePath='./dataFolder/data.csv';
+  //Convert to JSON
+    csv({noheader: true,headers: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK']})
+        .fromFile(csvFilePath)
+            .then((jsonObj)=>{
+                console.log(JSON.stringify(jsonObj).substring(0,100));
+                db.storeTrackingData(jsonObj,(err,result)=>{
+                    if(err){
+                        console.log("store tracking err: "+err)
+                        res.render("upload",{msg:"There was an error uploading the file."})
+                    }else{
+                        console.log("Success: "+result)
+                        
+                    }
+                })
+            });
+            res.render("customer")
+        })
+
 
 app.get("/register",function(req,res,next){
     res.render("register");
@@ -114,6 +147,7 @@ app.post("/authenticate",function(req,res,next){
                 });
                 res.render("upload",{
                     success:true,
+                    msg:null,
                     token: 'JWT '+token
                     
                 })  
@@ -144,7 +178,7 @@ request(url, function (error, response, body) {
 
 
 //listen
-const port = 3000;//process.env.PORT || 8080;
+const port = process.env.PORT || 8080;//3000
 
 app.listen(port,process.env.IP,function(){
     console.log("The PolyTrader server has started on port " + port);
