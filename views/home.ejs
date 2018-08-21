@@ -6,6 +6,12 @@
 <div class="login-page">
   
   <div class="form">
+    <% if(msg&&success){ %>
+      <p class="msgcolor"><%= msg %></p>
+      <% } %>
+      <% if(msg&&!success){ %>
+        <p class="badmsg"><%= msg %></p>
+        <% } %>
       <h5>File Upload Portal Login</h5>
     <form action="/authenticate" method="post" class="login-form">
         
@@ -13,7 +19,7 @@
       <input type="password" name="password" placeholder="password"/>
       
       <button type="submit">Log in</button>
-      <p class="message">Already registered? <a href="#">Sign In</a></p>
+      <p class="message">Are you a customer? <a href="http://www.mailonthemoveshipping.com/customer">Track Shipping</a></p>
     </form>
   
   </div>

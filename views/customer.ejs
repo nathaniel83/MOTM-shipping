@@ -4,6 +4,19 @@
 <div class="login-page">
   
         <div class="form">
+            <% if(body) { %>
+              <h4>Shipment Status:</h4>
+              <% if(body["Items"][0]["Events"][0]["City"]==null){ %>
+                <p>Shipment is between the plant and the shipper. Check back in 12-24 hours for updated shipping status.
+                  The shipper left the below message:
+                </p>
+                <% } %>
+              <p> <%= body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
+              <% if(body["Items"][0]["Events"][0]["City"]!=null){ %>
+                    <p>Package Location:<%= body["Items"][0]["Events"][0]["City"] %>, <%= body["Items"][0]["Events"][0]["State"] %>,<%= body["Items"][0]["Events"][0]["Zip"] %>, <%= body["Items"][0]["Events"][0]["Country"] %></p>
+                    <p>Expected Delivery: <%= body["Items"][0]["ExpectedDelivery"] %></p>
+              <% } %>
+              <% } %>
             
             <h5>Enter Tracking ID Below</h5>
           <form action="/getStatus" method="post" class="login-form">

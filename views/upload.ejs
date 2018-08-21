@@ -1,31 +1,35 @@
 <% include ./header %>
-<% if (token) { %>
-  <h2>I have a token!</h2>
+<% if (token && user) { %>
+  
   <script>
      var token = <%- "'"+JSON.stringify(token)+"'" %>;
      
-     localStorage.setItem("token",token);           
+     localStorage.setItem("token",token); 
+     localStorage.setItem("user",user);           
   </script>
 <% } %>
 
-<% if(msg) { %>
-  <h2> <%= msg %> </h2>
-  <% } %>
+
 <div class="login-page">
   
     <div class="form">
+        <% if(msg) { %>
+          <p class="msgcolor"> <%= msg %> </p>
+          <% } %>
         <h5>Submit Order Batch Files</h5>
-     
+        <h6>Submitting as <%= user %></h6>
       <form action="/upload" method="post" class="login-form" encType="multipart/form-data">
         <h9>Choose File Below</h9>
         <div class="input-field col s12">
-          
+           <input name="theuser" value="<%= user %>" type="hidden">
+           <input name="thetoken" value="<%= token %>" type="hidden">
             <input type="file"
              id="file" name="thefile"
              accept=".csv" />
           </div>
+          
         <button type="submit">Submit</button>
-        <p class="message">Add an uploader? <a href="#">Create an account</a></p>
+        <p class="message">Add an uploader? <a href="/register">Create an account</a></p>
       </form>
     </div>
   </div>

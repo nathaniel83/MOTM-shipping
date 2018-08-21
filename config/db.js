@@ -35,7 +35,7 @@ module.exports.passwordHash = function(newUser,callback){
             console.log("the hash"+hash)
             newUser.password = hash;
             
-            let sql = "INSERT INTO users (username,password,type) VALUES('"+newUser.username+"','"+newUser.password+"','"+newUser.type+"')";
+            let sql = "INSERT INTO users (username,password,type) VALUES('"+newUser.username+"','"+newUser.password+"','admin')";
             console.log(sql);
             db.query(sql,function(err,result){
                 if(err) {
@@ -61,11 +61,12 @@ module.exports.comparePassword = function(candidatePassword, hash, callback){
 } 
 
 
-module.exports.storeTrackingData = function(theData,callback){
+module.exports.storeTrackingData = function(theData,theUser,callback){
     console.log("attempting to store tracking data");
+    console.log("the user is: "+theUser)
     let time = Date.now()
     for(var i = 0; i<theData.length;i++){
-    let sql = "INSERT INTO tracking (tracking_id,submitting_user,created) VALUES ('"+theData[i]['I']+"','"+"test"+"','"+time+"')";
+    let sql = "INSERT INTO tracking (tracking_id,submitting_user,created) VALUES ('"+theData[i]['I']+"','"+theUser+"','"+time+"')";
     db.query(sql,function(err,result){
         if(err) {
             callback(err,null);

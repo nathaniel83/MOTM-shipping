@@ -22,11 +22,6 @@ app.set("view engine","ejs");
 app.use(bodyParser.urlencoded({extended:true}));
 app.use( bodyParser.json({limit: '50mb'}) );
 
-app.use(function(req,res,next){
-    res.locals.currentUser = req.user;
- 
-    next();
-});
 
 require('./config/passport')(passport);
 app.use(passport.initialize());
@@ -52,14 +47,14 @@ db.connect(function(error){
 
 //routes
 app.get("/",function(req,res,next){
-    res.render("home");
+    res.render("home",{msg:null});
 })
 app.get("/customer",function(req,res,next){
-    res.render("customer");
+    res.render("customer",{body:null});
 })
 
-app.get("/upload",function(req,res,next){
-    res.render("upload");
+app.get("/upload",passport.authenticate('jwt',{session:false}),function(req,res,next){
+    res.render("upload",{data:null});
 })
 
 app.post("/upload",function(req,res,next){
@@ -67,6 +62,8 @@ app.post("/upload",function(req,res,next){
    console.log(req.files.thefile.name);
    //Save File
    let csvFile = req.files.thefile;
+   let user = req.body.theuser;
+   let token = req.body.thetoken;
    csvFile.mv('./dataFolder/data.csv', function(err) {
     if (err){
       
@@ -82,7 +79,7 @@ app.post("/upload",function(req,res,next){
         .fromFile(csvFilePath)
             .then((jsonObj)=>{
                 console.log(JSON.stringify(jsonObj).substring(0,100));
-                db.storeTrackingData(jsonObj,(err,result)=>{
+                db.storeTrackingData(jsonObj,user,(err,result)=>{
                     if(err){
                         console.log("store tracking err: "+err)
                         res.render("upload",{msg:"There was an error uploading the file."})
@@ -92,19 +89,25 @@ app.post("/upload",function(req,res,next){
                     }
                 })
             });
-            res.render("customer")
+            res.render("upload",{msg:"Successfully uploaded the file!",user:user,token:token});
         })
 
 
 app.get("/register",function(req,res,next){
-    res.render("register");
+    res.render("register",{msg:null});
+    
 })
 
 app.post("/register",function(req,res,next){
+    if(req.body.password!=req.body.passwordconfirm){
+        console.log("passwords don't match")
+        res.render("register",{msg:"Passwords do not match! Try again."});
+        return;
+    }
     let newUser = {
         username:req.body.username,
         password:req.body.password,
-        type:req.body.type
+        
     }
     console.log(newUser)
     
@@ -113,10 +116,10 @@ app.post("/register",function(req,res,next){
     db.passwordHash(newUser,(err)=>{
         if(err){
             console.log('hash did not work!')
-            res.json({success: false,msg:"Failed to register"})
+            res.render("register",{success: false,msg:"Either the username already exists or something went wrong."})
         }else{
             console.log('hash did work!')
-            res.json({success:true,msg:"user registered"})    
+            res.render("home",{success:true,msg:"User registered! You may login."})    
         }
     });
 
@@ -136,7 +139,7 @@ app.post("/authenticate",function(req,res,next){
             console.log(err)
         };
         if(!user){
-            return res.json({success:false,msg:"User not found"});
+            return res.render("home",{success:false,msg:"User not found."});
         }else{
         
         db.comparePassword(password, user[0].password,(err, isMatch)=>{
@@ -148,7 +151,8 @@ app.post("/authenticate",function(req,res,next){
                 res.render("upload",{
                     success:true,
                     msg:null,
-                    token: 'JWT '+token
+                    token: 'JWT '+token,
+                    user:user[0].username
                     
                 })  
             }else{
@@ -167,8 +171,11 @@ app.post("/getStatus",function(req,res,next){
     var url = "http://OSMART.OSMWORLDWIDE.US/OSMServices/TrackingRESTService.svc/Tracking?trackingNumbers="+trackingNumber+"&format=JSON&APIKey="+apiKey;
 request(url, function (error, response, body) {
   if (!error && response.statusCode == 200) {
-    console.log(body) // Print the google web page.
-    res.send(body);
+    //  console.log(response)
+    console.log(JSON.parse(body)) // Print the google web page.
+   
+   
+    res.render("customer",{body:JSON.parse(body)});
   }else{
       console.log("api error is: "+error);
   }
