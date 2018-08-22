@@ -190,8 +190,9 @@ app.post("/getStatus",function(req,res,next){
 request(url, function (error, response, body) {
   if (!error && response.statusCode == 200) {
     //  console.log(response)
-    console.log(JSON.parse(body)) // Print the google web page.
-   
+    console.log(JSON.parse(body) )// Print the google web page.
+   var bod = JSON.parse(body);
+   console.log(bod["Items"][0]["Events"][0])
    
     res.render("customer",{body:JSON.parse(body),msg:null});
   }else{
