@@ -11,7 +11,7 @@
                 </p>
                 <h5> The shipper left the below message:</h5>
                 <% } %>
-              <p> <%= body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
+              <p> <%- body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
               <% if(body["Items"][0]["Events"][0]["City"]!=null){ %>
                     <h5><strong>Package Location:</strong></h5>
                     <p><%= body["Items"][0]["Events"][0]["City"] %>, <%= body["Items"][0]["Events"][0]["State"] %>,<%= body["Items"][0]["Events"][0]["Zip"] %>, <%= body["Items"][0]["Events"][0]["Country"] %></p>
