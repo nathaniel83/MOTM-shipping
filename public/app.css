@@ -6,6 +6,10 @@
    width:40%;
    border:1px solid lightgray;
 }
+
+.big{ 
+  font-weight: bold;
+ }
 .footspace{
     margin-top:100px;
 }

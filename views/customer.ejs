@@ -13,10 +13,23 @@
                 <% } %>
               <p> <%= body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
               <% if(body["Items"][0]["Events"][0]["City"]!=null){ %>
-                    <p>Package Location:<%= body["Items"][0]["Events"][0]["City"] %>, <%= body["Items"][0]["Events"][0]["State"] %>,<%= body["Items"][0]["Events"][0]["Zip"] %>, <%= body["Items"][0]["Events"][0]["Country"] %></p>
-                    <p>Expected Delivery: <%= body["Items"][0]["ExpectedDelivery"] %></p>
+                    <h5><strong>Package Location:</strong></h5>
+                    <p><%= body["Items"][0]["Events"][0]["City"] %>, <%= body["Items"][0]["Events"][0]["State"] %>,<%= body["Items"][0]["Events"][0]["Zip"] %>, <%= body["Items"][0]["Events"][0]["Country"] %></p>
+                    
+                    <h5><strong>Arrived at Above Package Location on:</strong></h5>
+                    <p id="date">-</p>
+                    <script>
+                        var date = Date("'"+ <%- body["Items"][0]["Events"][0]["Date"] %> + "'")
+                        var word = document.getElementById("date");
+                        word.innerHTML = date
+                      </script>
+                      <% if(body["Items"][0]["ExpectedDelivery"]!=null){ %>
+                      <h5>Expected Delivery:</h5>
+                      <p><%= body["Items"][0]["ExpectedDelivery"] %></p>
+                      <% } %>
               <% } %>
               <% } %>
+
             
             <h5>Enter Tracking ID Below</h5>
                 <% if(msg){ %>
