@@ -50,7 +50,7 @@ app.get("/",function(req,res,next){
     res.render("home",{msg:null});
 })
 app.get("/customer",function(req,res,next){
-    res.render("customer",{body:null});
+    res.render("customer",{body:null,msg:null});
 })
 
 app.get("/upload",passport.authenticate('jwt',{session:false}),function(req,res,next){
@@ -168,6 +168,24 @@ app.post("/authenticate",function(req,res,next){
 app.post("/getStatus",function(req,res,next){
     var apiKey = "R=rOcP^{0HZz";
     var trackingNumber = req.body.trackingid;
+    console.log("the tracking number used in api: "+trackingNumber)
+    db.hasTrackingId(trackingNumber,(err,result)=>{
+        if(err){
+            console.log("error from matching function: "+err);
+            res.render("customer",{body:null,msg:"Internal Server Error, something went wrong."})
+            return;
+        }else{
+            console.log("tracking match results in route: "+result)
+            if(result.length>0){
+                console.log("Succesful Tracking Number Match")
+            }else{
+                console.log("No tracking numbers found");
+                res.render("customer",{body:null,msg:"No matching tracking number found."});
+                return;
+
+            }
+        }
+    })
     var url = "http://OSMART.OSMWORLDWIDE.US/OSMServices/TrackingRESTService.svc/Tracking?trackingNumbers="+trackingNumber+"&format=JSON&APIKey="+apiKey;
 request(url, function (error, response, body) {
   if (!error && response.statusCode == 200) {
@@ -175,7 +193,7 @@ request(url, function (error, response, body) {
     console.log(JSON.parse(body)) // Print the google web page.
    
    
-    res.render("customer",{body:JSON.parse(body)});
+    res.render("customer",{body:JSON.parse(body),msg:null});
   }else{
       console.log("api error is: "+error);
   }
