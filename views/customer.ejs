@@ -8,8 +8,8 @@
               <h4>Shipment Status:</h4>
               <% if(body["Items"][0]["Events"][0]["City"]==null){ %>
                 <p>Shipment is between the plant and the shipper. Check back in 12-24 hours for updated shipping status.
-                  The shipper left the below message:
                 </p>
+                <h5> The shipper left the below message:</h5>
                 <% } %>
               <p> <%= body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
               <% if(body["Items"][0]["Events"][0]["City"]!=null){ %>
