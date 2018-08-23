@@ -81,7 +81,7 @@ module.exports.storeTrackingData = function(theData,theUser,callback){
 }
 
 module.exports.hasTrackingId = function(trackingId,callback){
-    console.log("Checking to see if tracking id matches database records")
+    console.log("Checking to see if tracking id matches database records with this id: "+trackingId)
     let sql = "SELECT * FROM tracking WHERE tracking_id='"+trackingId+"'";
     db.query(sql,function(err,result){
         if(err){

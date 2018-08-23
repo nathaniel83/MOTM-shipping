@@ -50,7 +50,7 @@ app.get("/",function(req,res,next){
     res.render("home",{msg:null});
 })
 app.get("/customer",function(req,res,next){
-    res.render("customer",{body:null,msg:null});
+    res.render("customer",{data:null,msg:null});
 })
 
 app.get("/upload",passport.authenticate('jwt',{session:false}),function(req,res,next){
@@ -169,32 +169,39 @@ app.post("/getStatus",function(req,res,next){
     var apiKey = "R=rOcP^{0HZz";
     var trackingNumber = req.body.trackingid;
     console.log("the tracking number used in api: "+trackingNumber)
+   
+
     db.hasTrackingId(trackingNumber,(err,result)=>{
         if(err){
             console.log("error from matching function: "+err);
-            res.render("customer",{body:null,msg:"Internal Server Error, something went wrong."})
-            return;
+            return res.render("customer",{data:null,msg:"Internal Server Error, something went wrong."})
+           
         }else{
             console.log("tracking match results in route: "+result)
             if(result.length>0){
                 console.log("Succesful Tracking Number Match")
             }else{
                 console.log("No tracking numbers found");
-                res.render("customer",{body:null,msg:"No matching tracking number found."});
-                return;
+                return res.render("customer",{data:null,msg:"No matching tracking number found."});
+                
 
             }
         }
     })
+    console.log("tracking number about to put in url :"+trackingNumber)
     var url = "http://OSMART.OSMWORLDWIDE.US/OSMServices/TrackingRESTService.svc/Tracking?trackingNumbers="+trackingNumber+"&format=JSON&APIKey="+apiKey;
-request(url, function (error, response, body) {
+    console.log("Create URL string: "+url)
+request(url, function(error, response, body) {
   if (!error && response.statusCode == 200) {
     //  console.log(response)
-    console.log(JSON.parse(body) )// Print the google web page.
-   var bod = JSON.parse(body);
-   console.log(bod["Items"][0]["Events"][0])
+    if(body=="Invalid request, please check your parameters and APIKey."){
+        return     res.render("customer",{data:null,msg:"There is an error with the shipping API"});
+
+    }
+    console.log("parsed json obj body response" + JSON.parse(body) )// Print the google web page.
    
-    res.render("customer",{body:JSON.parse(body),msg:null});
+   
+    res.render("customer",{data:JSON.parse(body),msg:null});
   }else{
       console.log("api error is: "+error);
   }

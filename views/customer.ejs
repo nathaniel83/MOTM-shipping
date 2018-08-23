@@ -4,32 +4,6 @@
 <div class="login-page">
   
         <div class="form">
-            <% if(body) { %>
-              <h4>Shipment Status:</h4>
-              <% if(body["Items"][0]["Events"][0]["City"]==null){ %>
-                <p>Shipment is between the plant and the shipper. Check back in 12-24 hours for updated shipping status.
-                </p>
-                <h5> The shipper left the below message:</h5>
-                <% } %>
-              <p> <%- body["Items"][0]["Events"][0]["StatusDescription"] %> </p>
-              <% if(body["Items"][0]["Events"][0]["City"]!=null){ %>
-                    <h5><strong>Package Location:</strong></h5>
-                    <p><%= body["Items"][0]["Events"][0]["City"] %>, <%= body["Items"][0]["Events"][0]["State"] %>,<%= body["Items"][0]["Events"][0]["Zip"] %>, <%= body["Items"][0]["Events"][0]["Country"] %></p>
-                    
-                    <h5><strong>Arrived at Above Package Location on:</strong></h5>
-                    <p id="date">-</p>
-                    <script>
-                        var date = Date("'"+ <%- body["Items"][0]["Events"][0]["Date"] %> + "'")
-                        var word = document.getElementById("date");
-                        word.innerHTML = date
-                      </script>
-                      <% if(body["Items"][0]["ExpectedDelivery"]!=null){ %>
-                      <h5>Expected Delivery:</h5>
-                      <p><%= body["Items"][0]["ExpectedDelivery"] %></p>
-                      <% } %>
-              <% } %>
-              <% } %>
-
             
             <h5>Enter Tracking ID Below</h5>
                 <% if(msg){ %>
@@ -40,6 +14,30 @@
             <button type="submit">Get Shipping Status</button>
       
           </form>
+          <!--If there is location info in first event, make table-->
+          <% if(data!= null){ %>
+          <% if(data["Items"][0]["Events"][0]["City"]!=null){ %>
+            <table>
+              <thead>
+                <th>Date and Time</th><th>Status</th><th>Location</th>
+              </thead>
+              <% for(var i=0;i < data["Items"][0]["Events"].length; i++){ %>
+              <tr>
+                <script>var x = 'hello';</script>
+                <td><%= Date(data["Items"][0]["Events"][i]["Date"])  %></td><td><%= data["Items"][0]["Events"][i]["StatusDescription"] %></td><td><%= data["Items"][0]["Events"][i]["DisplayLocation"] %></td>
+              </tr>
+              <% } %>
+            </table>
+            <% }else{ %>
+                  <h2>Shipping Status:</h2>
+                  <p>The package is likely between Mail on the Move and the shipper. Check back in 
+                    12-24 hours for a status update. 
+                  </p>
+                  <p>In the meantime, the shipper provided the below message:</p>
+                  <p><%- data["Items"][0]["Events"][0]["StatusDescription"] %></p>
+              <% } %>
+            <% } %>
+          
         
         </div>
       </div>
