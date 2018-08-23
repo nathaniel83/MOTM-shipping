@@ -15,16 +15,17 @@
       
           </form>
           <!--If there is location info in first event, make table-->
-          <% if(data!= null){ %>
-          <% if(data["Items"][0]["Events"][0]["City"]!=null){ %>
+          <% if(data!=null){ %>
+          <% if(data["Events"]!=null){ %>
+         
             <table>
               <thead>
                 <th>Date and Time</th><th>Status</th><th>Location</th>
               </thead>
-              <% for(var i=0;i < data["Items"][0]["Events"].length; i++){ %>
+              <% for(var i=0;i < data["Events"].length; i++){ %>
               <tr>
-                <script>var x = 'hello';</script>
-                <td><%= Date(data["Items"][0]["Events"][i]["Date"])  %></td><td><%= data["Items"][0]["Events"][i]["StatusDescription"] %></td><td><%= data["Items"][0]["Events"][i]["DisplayLocation"] %></td>
+                
+                <td><%= data["Events"][i][0]  %></td><td><%= data["Events"][i][1]   %></td><td><%= data["Events"][i][2]  %></td>
               </tr>
               <% } %>
             </table>
@@ -34,9 +35,10 @@
                     12-24 hours for a status update. 
                   </p>
                   <p>In the meantime, the shipper provided the below message:</p>
-                  <p><%- data["Items"][0]["Events"][0]["StatusDescription"] %></p>
+                  <p><%- data["Description"] %></p>
               <% } %>
-            <% } %>
+              <% } %>
+            
           
         
         </div>

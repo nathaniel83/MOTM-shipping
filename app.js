@@ -53,9 +53,7 @@ app.get("/customer",function(req,res,next){
     res.render("customer",{data:null,msg:null});
 })
 
-app.get("/upload",passport.authenticate('jwt',{session:false}),function(req,res,next){
-    res.render("upload",{data:null});
-})
+
 
 app.post("/upload",function(req,res,next){
    console.log("upload route");
@@ -64,6 +62,7 @@ app.post("/upload",function(req,res,next){
    let csvFile = req.files.thefile;
    let user = req.body.theuser;
    let token = req.body.thetoken;
+   let filename = req.body.filename;
    csvFile.mv('./dataFolder/data.csv', function(err) {
     if (err){
       
@@ -79,7 +78,7 @@ app.post("/upload",function(req,res,next){
         .fromFile(csvFilePath)
             .then((jsonObj)=>{
                 console.log(JSON.stringify(jsonObj).substring(0,100));
-                db.storeTrackingData(jsonObj,user,(err,result)=>{
+                db.storeTrackingData(jsonObj,user,filename,(err,result)=>{
                     if(err){
                         console.log("store tracking err: "+err)
                         res.render("upload",{msg:"There was an error uploading the file."})
@@ -198,10 +197,48 @@ request(url, function(error, response, body) {
         return     res.render("customer",{data:null,msg:"There is an error with the shipping API"});
 
     }
-    console.log("parsed json obj body response" + JSON.parse(body) )// Print the google web page.
-   
-   
-    res.render("customer",{data:JSON.parse(body),msg:null});
+    console.log("parsed json obj body response" + JSON.parse(body) )
+    var data = JSON.parse(body);// Print the google web page.
+    if(data["Items"][0]["Events"][0]["City"]!=null){ 
+        var eventArray =[];
+        var date;
+        var status;
+        var location;
+        var tempDate;
+        var ampm;
+        var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+        for(var i=0;i < data["Items"][0]["Events"].length; i++){
+            tempDate = data["Items"][0]["Events"][i]["Date"]
+            date = new Date(parseInt(tempDate.substr(6)));
+            var year = date.getFullYear();
+            var month = months[date.getMonth()];
+            var daydate = date.getDate();
+            var dayname = days[date.getDay()];
+            if(date.getHours()>12){
+                ampm = "PM"
+            }else{
+                ampm = "AM"
+            }
+            var hour =  ((date.getHours() + 11) % 12 + 1);
+            var minute = date.getMinutes();
+            console.log(minute.length)
+            if(minute.toString().length==1){
+                minute = "0"+minute;
+            }
+            var dateString = dayname + ' ' + month + ' ' + daydate + ' ' + year + ' ' + hour + ':' + minute +' '+ ampm;
+            status = data["Items"][0]["Events"][i]["StatusDescription"]
+            location = data["Items"][0]["Events"][i]["DisplayLocation"]
+            eventArray.push([dateString,status,location]);
+        }
+    }
+    var theData = {
+        Description:data["Items"][0]["Events"][0]["StatusDescription"],
+        Events:eventArray,
+
+    }
+    console.log("Constructed Array: " + eventArray)
+    res.render("customer",{data:theData,msg:null});
   }else{
       console.log("api error is: "+error);
   }

@@ -3,9 +3,9 @@
   
   <script>
      var token = <%- "'"+JSON.stringify(token)+"'" %>;
-     
+     var theUser = <%- "'"+JSON.stringify(user)+"'" %> 
      localStorage.setItem("token",token); 
-     localStorage.setItem("user",user);           
+     localStorage.setItem("user",theUser);           
   </script>
 <% } %>
 
@@ -23,6 +23,7 @@
         <div class="input-field col s12">
            <input name="theuser" value="<%= user %>" type="hidden">
            <input name="thetoken" value="<%= token %>" type="hidden">
+           <input id="filename" type="hidden" name="filename" value="currentval">
            <p>.csv files only</p>
             <input type="file"
              id="file" name="thefile"
@@ -30,10 +31,24 @@
           </div>
           
         <button type="submit">Submit</button>
-        <p class="message">Add an uploader? <a href="/register">Create an account</a></p>
+        <% if(user=="momadmin"){ %>
+          <p class="message">Add an uploader? <a href="/register">Create an account</a></p>
+       <% }else{ %>
+          <p class="message">Want to track shipping? <a href="/customer">Tracking Page</a></p>
+
+       <% } %>
       </form>
     </div>
   </div>
+
+  <script>
+  document.getElementById('file').onchange = function () {
+  
+  var val = this.value;
+  document.getElementById('filename').setAttribute("value",val);
+  
+};
+  </script>
 
 
 <!--

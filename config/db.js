@@ -19,10 +19,21 @@ const db = mysql.createConnection({
     console.log(usernamequery)
     
     db.query(usernamequery,function(err,result){
+        console.log("db res: "+JSON.stringify(result))
+        if(result&&result.length==0){
+            callback("User not found.",null)
+            return;
+        }
+        else if(result[0].username==null||result[0].password==null){
+            callback("Database Error: Either username or password was null.",null)
+            return;
+        }
         if(err) {
             callback(err,null);
+            return;
         }else{
             callback(null,result)
+            return;
         }
     })
 }
@@ -31,11 +42,14 @@ module.exports.passwordHash = function(newUser,callback){
     console.log(newUser)
     bcrypt.genSalt(10,(err,salt)=>{
         bcrypt.hash(newUser.password,salt,(err,hash)=>{
-            if(err) throw err;
+            if(err) {
+                console.log("password hash error in db func: "+err)
+                callback(err,null);
+            };
             console.log("the hash"+hash)
             newUser.password = hash;
             
-            let sql = "INSERT INTO users (username,password,type) VALUES('"+newUser.username+"','"+newUser.password+"','admin')";
+            let sql = "INSERT INTO users (username,password,type) VALUES('"+newUser.username+"','"+newUser.password+"','client')";
             console.log(sql);
             db.query(sql,function(err,result){
                 if(err) {
@@ -61,12 +75,14 @@ module.exports.comparePassword = function(candidatePassword, hash, callback){
 } 
 
 
-module.exports.storeTrackingData = function(theData,theUser,callback){
+module.exports.storeTrackingData = function(theData,theUser,theFile,callback){
     console.log("attempting to store tracking data");
     console.log("the user is: "+theUser)
-    let time = Date.now()
+ 
+    const dateTime = Date.now();
+    const timestamp = Math.floor(dateTime / 1000);
     for(var i = 0; i<theData.length;i++){
-    let sql = "INSERT INTO tracking (tracking_id,submitting_user,created) VALUES ('"+theData[i]['I']+"','"+theUser+"','"+time+"')";
+    let sql = "INSERT INTO tracking (tracking_id,submitting_user,created,file_name) VALUES ('"+theData[i]['I']+"','"+theUser+"','"+timestamp+"','"+theFile+"')";
     db.query(sql,function(err,result){
         if(err) {
             callback(err,null);
