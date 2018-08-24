@@ -1,0 +1,58 @@
+
+<% include ./header %>
+
+<script>var suburl;</script>
+
+<div class="login-page">
+  
+        <div class="form">
+            
+            <h5>Enter Tracking ID Below</h5>
+                <% if(msg){ %>
+                  <p class="badmsg"><%= msg %></p>
+                  <% } %>
+          <form id="theform" action="/getStatus" method="post" class="login-form">
+            <input id="tracknum" type="text" name="trackingid" placeholder="tracking ID"/>
+            <button type="submit">Get Shipping Status</button>
+      
+          </form>
+         
+          <!--If there is location info in first event, make table-->
+          <% if(data!=null){ %>
+          <% if(data["Events"]!=null){ %>
+         
+            <table>
+              <thead>
+                <th>Date and Time</th><th>Status</th><th>Location</th>
+              </thead>
+              <% for(var i=0;i < data["Events"].length; i++){ %>
+              <tr>
+                
+                <td><%= data["Events"][i][0]  %></td><td><%= data["Events"][i][1]   %></td><td><%= data["Events"][i][2]  %></td>
+              </tr>
+              <% } %>
+            </table>
+            <% }else{ %>
+                  <h2>Shipping Status:</h2>
+                  <p>The package is likely between Mail on the Move and the shipper. Check back in 
+                    12-24 hours for a status update. 
+                  </p>
+                  <p>In the meantime, the shipper provided the below message:</p>
+                  <p><%- data["Description"] %></p>
+              <% } %>
+              <% } %>
+            
+          
+        
+        </div>
+      </div>
+
+      <script>
+          var url = window.location.href;
+           suburl = url.substring(50);
+        
+          document.getElementById("tracknum").setAttribute("value",suburl)
+          document.getElementById("theform").submit();
+        </script>
+
+      <% include ./footer %>

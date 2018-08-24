@@ -166,7 +166,12 @@ app.post("/authenticate",function(req,res,next){
 
 app.post("/getStatus",function(req,res,next){
     var apiKey = "R=rOcP^{0HZz";
-    var trackingNumber = req.body.trackingid;
+    var trackingNumber;
+    
+        
+         trackingNumber = req.body.trackingid;
+
+   
     console.log("the tracking number used in api: "+trackingNumber)
    
 
@@ -244,6 +249,98 @@ request(url, function(error, response, body) {
   }
 })
 })
+
+
+app.get("/getStatus/custom/:trackingid",function(req,res,next){
+    var apiKey = "R=rOcP^{0HZz";
+    var trackingNumber;
+    console.log()
+    console.log("the param: "+req.params.trackingid)
+    if(req.params.trackingid){
+        console.log("hit param")
+        trackingNumber = req.params.trackingid;
+    }
+    console.log("the tracking number used in api: "+trackingNumber)
+   
+
+    db.hasTrackingId(trackingNumber,(err,result)=>{
+        if(err){
+            console.log("error from matching function: "+err);
+            return res.render("customer",{data:null,msg:"Internal Server Error, something went wrong."})
+           
+        }else{
+            console.log("tracking match results in route: "+result)
+            if(result.length>0){
+                console.log("Succesful Tracking Number Match")
+            }else{
+                console.log("No tracking numbers found");
+                return res.render("customer",{data:null,msg:"No matching tracking number found."});
+                
+
+            }
+        }
+    })
+    console.log("tracking number about to put in url :"+trackingNumber)
+    var url = "http://OSMART.OSMWORLDWIDE.US/OSMServices/TrackingRESTService.svc/Tracking?trackingNumbers="+trackingNumber+"&format=JSON&APIKey="+apiKey;
+    console.log("Create URL string: "+url)
+request(url, function(error, response, body) {
+  if (!error && response.statusCode == 200) {
+    //  console.log(response)
+    if(body=="Invalid request, please check your parameters and APIKey."){
+        return     res.render("customer",{data:null,msg:"There is an error with the shipping API"});
+
+    }
+    console.log("parsed json obj body response" + JSON.parse(body) )
+    var data = JSON.parse(body);// Print the google web page.
+    if(data["Items"][0]["Events"][0]["City"]!=null){ 
+        var eventArray =[];
+        var date;
+        var status;
+        var location;
+        var tempDate;
+        var ampm;
+        var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+        for(var i=0;i < data["Items"][0]["Events"].length; i++){
+            tempDate = data["Items"][0]["Events"][i]["Date"]
+            date = new Date(parseInt(tempDate.substr(6)));
+            var year = date.getFullYear();
+            var month = months[date.getMonth()];
+            var daydate = date.getDate();
+            var dayname = days[date.getDay()];
+            if(date.getHours()>12){
+                ampm = "PM"
+            }else{
+                ampm = "AM"
+            }
+            var hour =  ((date.getHours() + 11) % 12 + 1);
+            var minute = date.getMinutes();
+            console.log(minute.length)
+            if(minute.toString().length==1){
+                minute = "0"+minute;
+            }
+            var dateString = dayname + ' ' + month + ' ' + daydate + ' ' + year + ' ' + hour + ':' + minute +' '+ ampm;
+            status = data["Items"][0]["Events"][i]["StatusDescription"]
+            location = data["Items"][0]["Events"][i]["DisplayLocation"]
+            eventArray.push([dateString,status,location]);
+        }
+    }
+    var theData = {
+        Description:data["Items"][0]["Events"][0]["StatusDescription"],
+        Events:eventArray,
+
+    }
+    console.log("Constructed Array: " + eventArray)
+    return res.render("customer",{data:theData,msg:null});
+  }else{
+      console.log("api error is: "+error);
+  }
+})
+})
+
+//app.get("/customerlink",function(req,res,next){
+ //   res.render("customerlink",{msg:null,data:null})
+//})
 
 
 
