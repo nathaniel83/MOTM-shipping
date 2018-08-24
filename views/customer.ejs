@@ -16,6 +16,12 @@
           </form>
           <!--If there is location info in first event, make table-->
           <% if(data!=null){ %>
+          <% if(data["PackageId"]!=null){ %>
+            <h6>Tracking ID: <%= data["PackageId"] %></h6>
+            <% } %>
+            <% if(data["Expected"]!=null){ %>
+              <h6>Expected Delivery: <%= data["Expected"] %></h6>
+              <% } %>
           <% if(data["Events"]!=null){ %>
          
             <table>
