@@ -331,6 +331,8 @@ request(url, function(error, response, body) {
     var theData = {
         Description:data["Items"][0]["Events"][0]["StatusDescription"],
         Events:eventArray,
+        Expected:data["Items"][0]["ExpectedDelivery"],
+        PackageId:data["Items"][0]["TrackingId"]
 
     }
     console.log("Constructed Array: " + eventArray)
