@@ -26,6 +26,37 @@
   padding: 8% 0 0;
   margin: auto;
 }
+@media only screen and (max-device-width: 560px) {
+  .login-page{
+    width:470px;
+
+  }
+}
+@media only screen and (max-device-width: 480px) {
+  .login-page{
+    width:360px;
+
+  }
+}
+
+@media only screen and (max-device-width: 360px) {
+  .login-page{
+    width:330px;
+    
+  }
+}
+@media only screen and (max-device-width: 330px) {
+  .login-page{
+    width:300px;
+    
+  }
+}
+@media only screen and (max-device-width: 300px) {
+  .login-page{
+    width:280px;
+    
+  }
+}
 .form {
   position: relative;
   z-index: 1;
