@@ -5,7 +5,15 @@ var db = require("./config/db");
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const fileUpload = require('express-fileupload');
+const Json2csvParser = require('json2csv').Parser;
 var request = require('request');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+
+
+var fs = require("fs");
+var Client = require('ssh2').Client;
+
+
 
 const csv=require('csvtojson')
 
@@ -53,6 +61,37 @@ app.get("/customer",function(req,res,next){
     res.render("customer",{data:null,msg:null});
 })
 
+app.get("/ftpTest",function(req,res,next){
+    res.render("ftpTest");
+}
+);
+
+app.post("/ftpTest",function(req,res,next){
+    console.log("post route hit");
+ 
+ 
+var conn = new Client();
+conn.on('ready', function() {
+  console.log('Client :: ready');
+  conn.sftp(function(err, sftp) {
+    if (err) throw err;
+    sftp.fastPut('./dataFolder/ftpData.csv','./MANIFEST/data.csv', function(err) {
+      if (err) throw err;
+      console.log("no error")
+     conn.end();
+
+    })
+  });
+}).connect({
+  host: 'sftp.osmworldwide.us',
+  port: 22,
+  username: 'mailsftp2018move',
+  password: '^9735kf;X*_*z'
+});
+
+    res.render("ftpTest")
+})
+
 
 
 app.post("/upload",function(req,res,next){
@@ -72,8 +111,107 @@ app.post("/upload",function(req,res,next){
     }
   });
 
+
+  function buildFile(theData){
+      console.log("Hit function");
+      var entryArray = [];
+      console.log(JSON.stringify(theData).substring(0,140));
+      const fields = ['Package Id','Company','Full Name','Address 1','Address 2','City','State','Zip','Country','Cost Center','Reference 1','Reference 2','Reference 3','Reference 4','Weight']
+
+      for(var i = 0;i<theData.length;i++){
+
+        var theItem = {
+            "Package Id":theData[i]["I"],
+            "Company":"",
+            "Full Name":theData[i]["M"],
+            "Address 1":theData[i]["O"],
+            "Address 2":theData[i]["P"],
+            "City":theData[i]["S"],
+            "State":theData[i]["T"],
+            "Zip":theData[i]["U"],
+            "Country":theData[i]["W"],
+            "Cost Center":"",
+            "Reference 1":"",
+            "Reference 2":"",
+            "Reference 3":"",
+            "Reference 4":"",
+            "Weight":theData[i]["A"]
+
+        }
+        entryArray.push(theItem);
+      }
+      var x = 0;
+      console.log("second entry spot check")
+      console.log(entryArray[x++])
+     // const json2csvParser = new Json2csvParser({fields});
+     // const theCsv = json2csvParser.parse(entryArray);
+      console.log(typeof(theCsv));
+      const csvWriter = createCsvWriter({
+        path: './dataFolder/ftpData.csv',
+        header: [
+            {id: 'Package Id', title: 'Package Id'},
+            {id: 'Company', title: 'Company'},
+            {id: 'Full Name', title: 'Full Name'},
+            {id: 'Address 1', title: 'Address 1'},
+            {id: 'Address 2', title: 'Address 2'},
+            {id: 'City', title: 'City'},
+            {id: 'State', title: 'State'},
+            {id: 'Zip', title: 'Zip'},
+            {id: 'Country', title: 'Country'},
+            {id: 'Cost Center Id', title: 'Cost Center Id'},
+            {id: 'Reference 1', title: 'Reference 1'},
+            {id: 'Reference 2', title: 'Reference 2'},
+            {id: 'Reference 3', title: 'Reference 3'},
+            {id: 'Reference 4', title: 'Reference 4'},
+            {id: 'Weight', title: 'Weight'},
+        ]
+    });
+    var promise1 = csvWriter.writeRecords(entryArray)
+        .then(()=>{
+            console.log("...Done");
+        })
+
+        Promise.all([promise1]).then(()=>{
+            sendFTP();
+        })
+
+      
+    
+    
+      
+  }
+
+  function sendFTP(){
+      var fileString = "./MANIFEST/MOTM" + filename.substring(filename.length-8,filename.length-4) + Date.now() + ".csv";
+    console.log("post route hit");
+    console.log("the new file name: "+fileString)
+ 
+ 
+    var conn = new Client();
+    conn.on('ready', function() {
+      console.log('Client :: ready');
+      conn.sftp(function(err, sftp) {
+        if (err) throw err;
+        sftp.fastPut('./dataFolder/ftpData.csv',fileString, function(err) {
+          if (err) throw err;
+          console.log("no error")
+         conn.end();
+    
+        })
+      });
+    }).connect({
+      host: 'sftp.osmworldwide.us',
+      port: 22,
+      username: 'mailsftp2018move',
+      password: '^9735kf;X*_*z'
+    });
+  }
+
    const csvFilePath='./dataFolder/data.csv';
   //Convert to JSON
+
+  function initialParse(){
+      return new Promise(function(resolve,reject){
     csv({noheader: true,headers: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK']})
         .fromFile(csvFilePath)
             .then((jsonObj)=>{
@@ -83,11 +221,22 @@ app.post("/upload",function(req,res,next){
                         console.log("store tracking err: "+err)
                         res.render("upload",{msg:"There was an error uploading the file."})
                     }else{
-                        console.log("Success: "+result)
+                        console.log("Success: ");
+                        resolve(jsonObj);
                         
                     }
                 })
-            });
+            })
+        })
+        }   
+        initialParse().then((data,err)=>{
+            if(err){
+                console.log(err)
+            }else{
+            buildFile(data)
+            }
+        })
+           
             res.render("upload",{msg:"Successfully uploaded the file!",user:user,token:token});
         })
 
@@ -347,7 +496,11 @@ request(url, function(error, response, body) {
  //   res.render("customerlink",{msg:null,data:null})
 //})
 
+app.get("/home",function(req,res){
 
+    res.send("<h1>This is the home page</h1>");
+
+})
 
 //listen
 const port = process.env.PORT || 8080;//3000
@@ -355,3 +508,4 @@ const port = process.env.PORT || 8080;//3000
 app.listen(port,process.env.IP,function(){
     console.log("The PolyTrader server has started on port " + port);
 });
+

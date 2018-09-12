@@ -1,0 +1,32 @@
+<% include ./header %>
+
+
+
+<div class="login-page">
+  
+    <div class="form">
+        
+        <h5>FTP Test</h5>
+        
+      <form action="/ftpTest" method="post" class="login-form" encType="multipart/form-data">
+        <h9>Choose File Below</h9>
+        <div class="input-field col s12">
+         
+           <input id="filename" type="hidden" name="filename" value="currentval">
+           <p>.csv files only</p>
+            <input type="file"
+             id="file" name="thefile"
+             accept=".csv" />
+          </div>
+          
+        <button type="submit">Submit</button>
+        
+      </form>
+    </div>
+  </div>
+
+
+
+
+
+<% include ./footer %>
