@@ -326,6 +326,8 @@ app.post("/getStatus",function(req,res,next){
             console.log("parsed json obj body response" + JSON.parse(body) )
             var data = JSON.parse(body);// Print the google web page.
             //Checks "City" on events array, if one exists we know we need to format event data
+         
+
             if(data["Items"][0]["Events"][0]["City"]!=null){ 
                 var eventArray =[];
                 var date;
@@ -333,7 +335,7 @@ app.post("/getStatus",function(req,res,next){
                 var location;
                 var tempDate;
                 var ampm;
-                var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                 var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
                 //Formats a Date for each tracking event in the array
                 for(var i=0;i < data["Items"][0]["Events"].length; i++){
@@ -365,7 +367,8 @@ app.post("/getStatus",function(req,res,next){
             Description:data["Items"][0]["Events"][0]["StatusDescription"],
             Events:eventArray,
             Expected:data["Items"][0]["ExpectedDelivery"],
-            PackageId:data["Items"][0]["TrackingId"]
+            PackageId:data["Items"][0]["TrackingId"],
+            CustomerPackageId:data["Items"][0]["CustomerPackageId"]
         }
         console.log("Constructed Array: " + eventArray)
         res.render("customer",{data:theData,msg:null});
@@ -420,7 +423,7 @@ app.get("/getStatus/custom/:trackingid",function(req,res,next){
                 var location;
                 var tempDate;
                 var ampm;
-                var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                 var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
                 for(var i=0;i < data["Items"][0]["Events"].length; i++){
                     tempDate = data["Items"][0]["Events"][i]["Date"]
@@ -450,7 +453,8 @@ app.get("/getStatus/custom/:trackingid",function(req,res,next){
             Description:data["Items"][0]["Events"][0]["StatusDescription"],
             Events:eventArray,
             Expected:data["Items"][0]["ExpectedDelivery"],
-            PackageId:data["Items"][0]["TrackingId"]
+            PackageId:data["Items"][0]["TrackingId"],
+            CustomerPackageId:data["Items"][0]["CustomerPackageId"]
             }
             console.log("Constructed Array: " + eventArray)
             return res.render("customer",{data:theData,msg:null});
