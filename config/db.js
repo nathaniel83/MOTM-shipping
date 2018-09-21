@@ -4,7 +4,7 @@ var bcrypt = require("bcryptjs");
 const db = mysql.createConnection({
     host     : 'daaashleydbinstance.c8t7ta0pz7pb.us-east-2.rds.amazonaws.com',
     user     : 'daaashley',
-    password : 'Watayo66$',
+    password : process.env.DATABASE_PASSWORD,
     database : 'mailonthemove',
     port : '3306'
  });
