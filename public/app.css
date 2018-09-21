@@ -22,7 +22,7 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
 .login-page {
-  width: 560px;
+  width: 650px;
   padding: 8% 0 0;
   margin: auto;
 }
@@ -61,7 +61,7 @@
   position: relative;
   z-index: 1;
   background: #FFFFFF;
-  max-width: 560px;
+  max-width: 650px;
   margin: 0 auto 100px;
   padding: 45px;
   text-align: center;
@@ -172,4 +172,71 @@ body {
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;      
+}
+
+
+
+.inventory {
+  width: 1000px;
+  padding: 8% 0 0;
+  margin: auto;
+}
+@media only screen and (max-device-width: 860px) {
+  .inventory{
+    width:750px;
+
+  }
+}
+@media only screen and (max-device-width: 760px) {
+  .inventory{
+    width:650px;
+
+  }
+}
+@media only screen and (max-device-width: 660px) {
+  .inventory{
+    width:550px;
+
+  }
+}
+@media only screen and (max-device-width: 560px) {
+  .inventory{
+    width:470px;
+
+  }
+}
+@media only screen and (max-device-width: 480px) {
+  .inventory{
+    width:360px;
+
+  }
+}
+
+@media only screen and (max-device-width: 360px) {
+  .login-page{
+    width:330px;
+    
+  }
+}
+@media only screen and (max-device-width: 330px) {
+  .inventory{
+    width:300px;
+    
+  }
+}
+@media only screen and (max-device-width: 300px) {
+  .inventory{
+    width:280px;
+    
+  }
+}
+.inventory-form {
+  position: relative;
+  z-index: 1;
+  background: #FFFFFF;
+  max-width: 1000px;
+  margin: 0 auto 100px;
+  padding: 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }

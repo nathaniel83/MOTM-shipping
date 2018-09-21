@@ -61,6 +61,23 @@ app.get("/ftpTest",function(req,res,next){
     res.render("ftpTest");
 });
 
+app.get("/inventory",function(req,res,next){
+
+    filename = "MOTM0906.csv"
+    csvNumbers = [123,623,365,506,360,647,658,446,347,265,274,507,697,657,586,492,383,347];
+    packagesCounted = 28;
+
+    theData = {
+        file:filename,
+        numbers:csvNumbers,
+        quantity:packagesCounted
+    }
+
+
+
+    res.render("inventory",{data:theData});
+});
+
 //Used strictly as an isolated SFTP Test
 /**
 app.post("/ftpTest",function(req,res,next){
