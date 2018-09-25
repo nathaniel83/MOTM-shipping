@@ -1,0 +1,82 @@
+<% include ./header %>
+
+
+
+
+<div class="inventory">
+  
+    <div class="inventory-form">
+        <div class="row">
+        <h4>Label Creation and Inventory Check </h4>
+        <div class="col s6">
+            <h6>Tracking Data Filename: <%= data.file %></h6>
+
+            <% if(data.numbers.length > data.quantity){ %>
+                <h5 class="yellow">Warning: Missing <%= data.numbers.length - data.quantity %> packages. </h5>
+                <h6 class="yellow">Try recounting packages received to confirm count discrepancy. Contact customer
+                    if counts are still different.
+                </h6>
+            <% }else if(data.numbers.length < data.quantity){ %>
+                <h5 class="yellow">Warning: Missing <%= data.quantity - data.numbers.length %> tracking numbers. </h5>
+                <h6 class="yellow">Try recounting packages received to confirm count discrepancy. Contact customer
+                    if counts are still different.
+                </h6>
+            <% }else if(data.numbers.length==data.quantity){ %>
+                <h5 class="light-green accent-3">Tracking numbers and packages count matches! </h5>
+                <h6 class="light-green accent-3">Clear to print labels without mismatch.</h6>
+                <% } %>
+        </div>
+        <div class="collection col s6">
+            <a href="#!" class="collection-item">Choose a different file    ></a>
+            <a href="#!" class="collection-item">Specify a different package quantity   ></a>
+            <a href="#!" class="collection-item">Confirm and Print Labels   ></a>
+            <a href="#!" class="collection-item">Other  ></a>
+        </div>
+        <h4>Inventory Comparison: </h4>
+    </div>
+
+        <table>
+            <thead>
+              <tr>
+                  <th>Package Id</th>
+                  <th>Expected Package Count</th>
+                  <th>Status</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+                <% if(data.numbers.length > data.quantity){ %>
+                <%    var theLength = data.numbers.length %>
+               <% }else{ %>
+               <%     var theLength = data.quantity %>
+               <% } %>
+                
+            <% for(var i = 0; i < theLength; i++){ %>
+              <tr>
+                  <% if(data.numbers[i]!=null){ %>
+                <td>Package <%= data.numbers[i] %></td>
+                    <% }else{ %>
+                <td>Missing Package <%= i + 1 %></td>
+                <% } %>
+                <% if(i < data.quantity && data.numbers[i]!=null){ %>
+                    <td>Package Expected <%= i + 1 %> </td>
+                    <td><i class="material-icons green">check</i> </td>
+                <% }else if(i < data.quantity && data.numbers[i]==null){ %>
+                    <td>Package Expected <%= i + 1%> </td>
+                    <td><i class="material-icons red">close</i> </td>
+                <% }else{ %>
+                    <td>Missing Package <%= i + 1%> </td>
+                    <td><i class="material-icons red">close</i> </td>
+                <% } %>
+                <% } %>
+            </tbody>
+          </table>
+    
+    </div>
+  </div>
+
+
+
+
+
+<% include ./footer %>

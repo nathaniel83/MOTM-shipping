@@ -49,7 +49,7 @@ module.exports.passwordHash = function(newUser,callback){
             console.log("the hash"+hash)
             newUser.password = hash;
             
-            let sql = "INSERT INTO users (username,password,type) VALUES('"+newUser.username+"','"+newUser.password+"','client')";
+            let sql = "INSERT INTO users (username,password,type,file_path) VALUES('"+newUser.username+"','"+newUser.password+"','"+newUser.type+"','"+newUser.username+"')";
             console.log(sql);
             db.query(sql,function(err,result){
                 if(err) {
@@ -99,6 +99,76 @@ module.exports.storeTrackingData = function(theData,theUser,theFile,callback){
 module.exports.hasTrackingId = function(trackingId,callback){
     console.log("Checking to see if tracking id matches database records with this id: "+trackingId)
     let sql = "SELECT * FROM tracking WHERE tracking_id='"+trackingId+"'";
+    db.query(sql,function(err,result){
+        if(err){
+            callback(err,null);
+        }else{
+            console.log("Resulting data from db track matching: "+JSON.stringify(result))
+            callback(null,result);
+        }
+    })
+}
+
+
+module.exports.addShippingFile = function(fileData,callback){
+    console.log("hit shipping file function");
+    let sql = "INSERT INTO shipping_data (user,file_name,file_path,upload_date,status) VALUES('"+fileData.user+"','"+fileData.file_name+"','"+fileData.file_path+"','"+fileData.upload_date+"','"+fileData.status+"')";
+    console.log(sql);
+    db.query(sql,function(err,result){
+        if(err){
+            callback(err,null);
+        }else{
+            console.log("Resulting data from db track matching: "+JSON.stringify(result))
+            callback(null,result);
+        }
+    })
+}
+
+module.exports.getFiles = function(username,callback){
+    console.log("Checking to see if tracking id matches database records with this id: "+username)
+    let sql = "SELECT * FROM shipping_data WHERE user='"+username+"'";
+    db.query(sql,function(err,result){
+        if(err){
+            callback(err,null);
+        }else{
+            console.log("Resulting data from db track matching: "+JSON.stringify(result))
+            callback(null,result);
+        }
+    })
+}
+
+module.exports.getAllFiles = function(callback){
+    console.log("grabbing all tracking data")
+    let sql = "SELECT * FROM shipping_data";
+    db.query(sql,function(err,result){
+        if(err){
+            callback(err,null);
+        }else{
+            console.log("Resulting data from db track matching: "+JSON.stringify(result))
+            callback(null,result);
+        }
+    })
+}
+
+module.exports.changeStatus = function(user,file,callback){
+    console.log("Changing status for: "+user + " "+file);
+    let sql = "UPDATE shipping_data SET status='Processed' WHERE user='"+user+"'"+" AND file_name='"+file+"'";
+    console.log(sql)
+    db.query(sql,function(err,result){
+        if(err){
+            callback(err,null);
+        }else{
+            console.log("Resulting data from db track matching: "+JSON.stringify(result))
+            callback(null,result);
+        }
+    })
+}
+
+
+module.exports.deleteFile = function(username,file,callback){
+    console.log("Checking to see if tracking id matches database records with this id: "+username)
+    let sql = "DELETE FROM shipping_data WHERE user='"+username+"'"+" AND file_name='"+file+"'";
+    console.log(sql)
     db.query(sql,function(err,result){
         if(err){
             callback(err,null);

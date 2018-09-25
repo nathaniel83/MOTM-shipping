@@ -57,6 +57,9 @@
     
   }
 }
+.noform{
+  position:relative;
+}
 .form {
   position: relative;
   z-index: 1;

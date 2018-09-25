@@ -1,0 +1,84 @@
+<% include ./dashboardclient %>
+
+
+<% if (token && user) { %>
+  
+    <script>
+       var token = <%- "'"+JSON.stringify(token)+"'" %>;
+       var theUser = <%- "'"+JSON.stringify(user)+"'" %> 
+       localStorage.setItem("token",token); 
+       localStorage.setItem("user",theUser);           
+    </script>
+  <% } %>
+
+
+
+
+
+<div class="inventory">
+  
+    <div class="inventory-form">
+            
+        <h3>Files uploaded from <%= user %></h3>
+        <% if(msg){ %>
+        <h5 class="txt"><%= msg %></h5>
+        <% } %>
+        <p>We recommend deleting files once the status indicates "processed".<br>
+            This will erase your file from our servers.<br>
+            You may download a file you have uploaded at anytime.
+        </p>
+       
+        <div class="row">
+        <form class="noform" action="/fileUploadPage" method="POST">
+                <input name="theuser" value="<%= user %>" type="hidden">
+                <input name="thetoken" value="<%= token %>" type="hidden">
+        <button class="btn green left-align" type="submit">Upload A File</button>
+         </form>
+        </div>    
+
+            <table>
+                <thead>
+                    <tr>
+                        <td>Filename</td><td>Upload Date</td><td>Status</td><td>Download File</td><td>Delete File</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i = 0; i < data.length; i++){ %>
+                    <tr>
+                        <td>File <%= data[i].file_name %></td>
+                        <td><%= dates[i] %></td>
+                        <td><%= data[i].status %></td>
+                        
+                        <td><a class="btn green" href="/shippingFiles/<%= user %>/<%= data[i].file_name %>" download> <i class="material-icons green" aria-label="download">expand_more</i></a></td>
+
+                        <td><a class="btn red" href="/delete/<%= user %>/<%= data[i].file_name %>/<%= token %>"> <i class="material-icons red" aria-label="delete file">close</i></a></td>
+                    </tr>
+                    <% } %>
+                    
+                </tbody>
+            </table>
+        </div>
+
+
+</div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<% include ./footer %>

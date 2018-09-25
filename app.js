@@ -23,10 +23,13 @@ const fileUpload = require('express-fileupload');//req.body for files
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;//Writes JSON to CSV
 const Client = require('ssh2').Client;//SFTP Library
 const csv=require('csvtojson');//Parses CSV to JSON
+var mkdirp = require('mkdirp');
+    
+
 
 
 //Libray/Module/Security Config
-app.use(fileUpload());
+app.use(fileUpload({createParentPath:true}));
 app.set("view engine","ejs");
 app.use(bodyParser.urlencoded({extended:true}));
 app.use( bodyParser.json({limit: '50mb'}) );
@@ -60,6 +63,108 @@ app.get("/customer",function(req,res,next){
 app.get("/ftpTest",function(req,res,next){
     res.render("ftpTest");
 });
+
+app.post("/dashboard",function(req,res,next){
+    
+    db.getFiles
+
+    res.render("dashboard")
+})
+
+app.post("/fileUploadPage",function(req,res,next){
+    var user = req.body.theuser;
+    var token = req.body.thetoken;
+    
+    res.render("fileUpload",{msg:null,user:user,token:token})
+})
+
+app.post("/fileUpload",function(req,res,next){
+    let csvFile = req.files.thefile;
+    let username = req.body.theuser;
+    let token = req.body.thetoken;
+    let filename = req.body.filename;
+    
+    console.log("folder var returned: ")
+
+    filename = filename.substring(12)
+
+    console.log("formatted file name: "+filename)
+
+    let filePath = './public/shippingFiles/'+ username + "/" + filename;
+    console.log("the file path: "+filePath)
+    csvFile.mv(filePath, function(err) {
+        if (err){
+            console.log("there is an error: " +err)
+        }else{
+            console.log("File uploaded!");
+
+            var date = Date.now()
+
+            var theData = {
+                user:username,
+                file_name:filename,
+                file_path:filePath,
+                upload_date:date,
+                status:"Waiting"
+            }
+
+            db.addShippingFile(theData,(err,result)=>{
+                if(err){
+                    console.log("Database error for adding file: "+err);
+                }else{
+                    console.log("no error")
+                    console.log(result)
+                }
+            })
+
+
+
+
+
+        }
+    });
+    db.getFiles(username,(err,result)=>{
+        if(err){
+            console.log(err)
+        }else{
+            var arr = [];
+            var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+            for(var i = 0; i<result.length;i++){
+                var date =  new Date(parseInt(result[i].upload_date))
+                console.log("THE DATE "+date)
+                var day = date.getDate();
+                var month = date.getMonth()+1;
+                var year = date.getFullYear();
+                var dateString = month +'/'+day+'/'+year;
+                arr.push(dateString);
+            }
+
+            if(username=="admin"){
+                res.render("dashboardadmin",{
+                    success:true,
+                    msg:"Upload Success! Refresh page to view file.",
+                    token: token,
+                    user:username,
+                    data:result,
+                    dates:arr
+                    
+                }); 
+            }else{
+    res.render("dashboard",{
+        success:true,
+        msg:"Upload Success! Refresh page to view file.",
+        token: token,
+        user:username,
+        data:result,
+        dates:arr
+        
+    }); 
+} 
+}
+})
+   
+})
 
 app.get("/inventory",function(req,res,next){
 
@@ -261,8 +366,24 @@ app.post("/register",function(req,res,next){
     let newUser = {
         username:req.body.username,
         password:req.body.password,
+        type:req.body.type,
+        file_path:req.body.username
         
     }
+    
+    //Create new folder for client files
+    if(req.body.type=="uploadclient"){
+        let thePath = './public/shippingFiles/'+req.body.username + '/';
+        console.log("folder to be created: "+thePath)
+        mkdirp(thePath, function (err) {
+            if (err){
+                console.error(err)
+            }else{
+                console.log('Folder Created!')
+            } 
+        });
+    }   
+
     console.log(newUser)
     //PASSWORD ENCRYPT AND DATABASE INSERT--IN config/db.js
     db.passwordHash(newUser,(err)=>{
@@ -294,6 +415,77 @@ app.post("/authenticate",function(req,res,next){
                 if(err) throw err;
                 if(isMatch){
                     const token = jwt.sign({data: user},'verysecret',{expiresIn:604800}); //1 week
+                    if(user[0].type=="uploadclient"){
+
+                        db.getFiles(user[0].username,(err,result)=>{
+                            if(err){
+                                console.log(err)
+                            }else{
+                                var arr = [];
+                                var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+                                for(var i = 0; i<result.length;i++){
+                                    var date =  new Date(parseInt(result[i].upload_date))
+                                    console.log("THE DATE "+date)
+                                    var day = date.getDate();
+                                    var month = date.getMonth()+1;
+                                    var year = date.getFullYear();
+                                    var dateString = month +'/'+day+'/'+year;
+                                    arr.push(dateString);
+                                }
+
+
+                        res.render("dashboard",{
+                            success:true,
+                            msg:null,
+                            token: 'JWT '+token,
+                            user:user[0].username,
+                            data:result,
+                            dates:arr
+                            
+                        });  
+                    }
+                })
+                       
+
+                    }else if(user[0].type=="admin"){
+
+                        db.getAllFiles((err,result)=>{
+                            if(err){
+                                console.log(err)
+                            }else{
+                                var arr = [];
+                                var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+                                for(var i = 0; i<result.length;i++){
+                                    var date =  new Date(parseInt(result[i].upload_date))
+                                    console.log("THE DATE "+date)
+                                    var day = date.getDate();
+                                    var month = date.getMonth()+1;
+                                    var year = date.getFullYear();
+                                    var dateString = month +'/'+day+'/'+year;
+                                    arr.push(dateString);
+                                }
+
+
+                        res.render("dashboardadmin",{
+                            success:true,
+                            msg:null,
+                            token: 'JWT '+token,
+                            user:user[0].username,
+                            data:result,
+                            dates:arr
+                            
+                        });  
+                    }
+                })
+
+                    
+                    
+                    
+                    
+                    
+                    }else{
                 res.render("upload",{
                     success:true,
                     msg:null,
@@ -301,6 +493,7 @@ app.post("/authenticate",function(req,res,next){
                     user:user[0].username
                     
                 });  
+                    }
                 }else{
                     return res.render("home",{success:false,msg:'wrong password'})
                 }   
@@ -480,6 +673,156 @@ app.get("/getStatus/custom/:trackingid",function(req,res,next){
         }
     });
 });
+
+app.get("/delete/:user/:file/:token/:accountUser",function(req,res,next){
+    var accountUser = req.params.accountUser;
+    var user = req.params.user;
+    var file = req.params.file; 
+    var token = req.params.token;
+    if(accountUsr="momadmin"){
+    
+    db.deleteFile(user,file,(err,result)=>{
+        if(err){
+            console.log(err)
+        }else{
+            console.log("delete result: "+result)
+        }
+    })
+
+    db.getAllFiles((err,result)=>{
+        if(err){
+            console.log(err)
+        }else{
+            var arr = [];
+            var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+            for(var i = 0; i<result.length;i++){
+                var date =  new Date(parseInt(result[i].upload_date))
+                console.log("THE DATE "+date)
+                var day = date.getDate();
+                var month = date.getMonth()+1;
+                var year = date.getFullYear();
+                var dateString = month +'/'+day+'/'+year;
+                arr.push(dateString);
+            }
+
+
+    res.render("dashboardadmin",{
+        success:true,
+        msg:"Successfully deleted a file.",
+        token: token,
+        user:accountUser,
+        data:result,
+        dates:arr
+        
+    });  
+}
+})
+    }else{
+        db.deleteFile(user,file,(err,result)=>{
+            if(err){
+                console.log(err)
+            }else{
+                console.log("delete result: "+result)
+            }
+        })
+    
+        db.getFiles(user,(err,result)=>{
+            if(err){
+                console.log(err)
+            }else{
+                var arr = [];
+                var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+    
+                for(var i = 0; i<result.length;i++){
+                    var date =  new Date(parseInt(result[i].upload_date))
+                    console.log("THE DATE "+date)
+                    var day = date.getDate();
+                    var month = date.getMonth()+1;
+                    var year = date.getFullYear();
+                    var dateString = month +'/'+day+'/'+year;
+                    arr.push(dateString);
+                }
+    
+    
+        res.render("dashboard",{
+            success:true,
+            msg:"Successfully deleted a file.",
+            token: token,
+            user:accountUser,
+            data:result,
+            dates:arr
+            
+        });  
+    }
+    })
+
+    }
+
+   
+})
+
+
+app.get("/changeStatus/:user/:file/:account/:token",function(){
+    console.log(req.params.user)
+    console.log(req.params.file)
+    console.log(req.params.account)
+    console.log(req.params.token)
+})
+
+
+app.post("/changeStatus",function(req,res,next){
+    var user = req.body.theUser;
+    var token = req.body.token;
+    var fileUser = req.body.fileUser;
+    var fileName = req.body.fileName;
+    console.log("user logged in: "+user)
+    console.log("user of file: "+fileUser)
+
+    console.log("file name: "+fileName)
+
+    if(user=="momadmin"){
+        db.changeStatus(fileUser,fileName,(err,result)=>{
+            if(err){
+                console.log(err);
+            }else{
+                console.log(result);
+            }
+        })
+
+        db.getAllFiles((err,result)=>{
+            if(err){
+                console.log(err)
+            }else{
+                var arr = [];
+                var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+                for(var i = 0; i<result.length;i++){
+                    var date =  new Date(parseInt(result[i].upload_date))
+                    console.log("THE DATE "+date)
+                    var day = date.getDate();
+                    var month = date.getMonth()+1;
+                    var year = date.getFullYear();
+                    var dateString = month +'/'+day+'/'+year;
+                    arr.push(dateString);
+                }
+
+
+        res.render("dashboardadmin",{
+            success:true,
+            msg:"CSV downloaded and status changed to 'Processed'.",
+            token:token,
+            user:user,
+            data:result,
+            dates:arr
+            
+        });  
+    }
+})
+    }
+
+})
+
 
 
 
