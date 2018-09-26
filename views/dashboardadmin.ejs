@@ -7,7 +7,13 @@
        var token = <%- "'"+JSON.stringify(token)+"'" %>;
        var theUser = <%- "'"+JSON.stringify(user)+"'" %> 
        localStorage.setItem("token",token); 
-       localStorage.setItem("user",theUser);           
+       localStorage.setItem("user",theUser);   
+       
+       function submitForm(num){
+                var string = "#theform"+parseInt(num);
+                var form = document.querySelector(string);
+                form.submit();
+            }
     </script>
   <% } %>
 
@@ -56,7 +62,7 @@
                             <input type="hidden" name="theUser" value="<%= user %>">
                             <input type="hidden" name="token" value="<%= token %>">
                             <input type="hidden" name="fileUser" value="<%= data[i].user %>"><input type="hidden" name="fileName" value="<%= data[i].file_name %>">
-                        <td><a id="thelink<%= parseInt(i) %>"  class="btn green" href="/shippingFiles/<%= data[i].user %>/<%= data[i].file_name %>" download><i class="material-icons green" aria-label="download">expand_more</i> </a></td>
+                        <td><a onclick='submitForm(<%= i %>)' id="thelink<%= parseInt(i) %>"  class="btn green" href="/shippingFiles/<%= data[i].user %>/<%= data[i].file_name %>" download><i class="material-icons green" aria-label="download">expand_more</i> </a></td>
                     
                         <td><a class="btn red" href="/delete/<%= data[i].user %>/<%= data[i].file_name %>/<%= token %>/<%= user %>"> <i class="material-icons red" aria-label="delete file">close</i></a></td>
                     </form>
@@ -72,24 +78,32 @@
     </div>
 
     <script>
-       var data = <%- JSON.stringify(data) %>;
-       console.log(data)
-        var arr1 = [];
-        for(var x = 0; x<data.length;x++){
-            var formname = "#theform"+parseInt(x);
-            console.log(formname)
-            var form = document.querySelector(formname);
-            var linkname = "#thelink"+parseInt(x);
-            console.log(linkname);
-            document.querySelector(linkname).addEventListener("click",function(){
+            var data = <%- JSON.stringify(data) %>;
+     
+     
+            submitForm(num){
+                var string = "#theform"+parseInt(num);
+                var form = document.querySelector(string);
                 form.submit();
-            })
-        }
-      
-        
-
-    
-    </script>
+            }
+     
+            console.log(data)
+             var arr1 = [];
+             for(var x = 0; x<data.length;x++){
+                 var formname = "#theform"+parseInt(x);
+                 console.log(formname)
+                 var form = document.querySelector(formname);
+                 var linkname = "#thelink"+parseInt(x);
+                 console.log(linkname);
+                 document.querySelector(linkname).addEventListener("click",function(){
+                     form.submit();
+                 })
+             }
+           
+             
+     
+         
+         </script>
 
 
 

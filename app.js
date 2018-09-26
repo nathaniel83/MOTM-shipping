@@ -674,6 +674,55 @@ app.get("/getStatus/custom/:trackingid",function(req,res,next){
     });
 });
 
+app.get("/delete/:user/:file/:token",function(req,res,next){
+    
+    var user = req.params.user;
+    var file = req.params.file; 
+    var token = req.params.token;
+
+    db.deleteFile(user,file,(err,result)=>{
+        if(err){
+            console.log(err)
+        }else{
+            console.log("delete result: "+result)
+        }
+    })
+
+     
+    db.getFiles(user,(err,result)=>{
+        if(err){
+            console.log(err)
+        }else{
+            var arr = [];
+            var months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+            for(var i = 0; i<result.length;i++){
+                var date =  new Date(parseInt(result[i].upload_date))
+                console.log("THE DATE "+date)
+                var day = date.getDate();
+                var month = date.getMonth()+1;
+                var year = date.getFullYear();
+                var dateString = month +'/'+day+'/'+year;
+                arr.push(dateString);
+            }
+
+
+    res.render("dashboard",{
+        success:true,
+        msg:"Successfully deleted a file.",
+        token: token,
+        user:user,
+        data:result,
+        dates:arr
+        
+    });  
+}
+});
+
+})
+
+
+
 app.get("/delete/:user/:file/:token/:accountUser",function(req,res,next){
     var accountUser = req.params.accountUser;
     var user = req.params.user;
@@ -783,7 +832,7 @@ app.post("/changeStatus",function(req,res,next){
 
     if(user=="momadmin"){
         db.changeStatus(fileUser,fileName,(err,result)=>{
-            if(err){
+            if(err){    
                 console.log(err);
             }else{
                 console.log(result);
